@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33213.308
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Animle", "Animle\Animle.csproj", "{B3D44DBC-5673-45A0-A023-4A593CA8845D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B3D44DBC-5673-45A0-A023-4A593CA8845D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3D44DBC-5673-45A0-A023-4A593CA8845D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3D44DBC-5673-45A0-A023-4A593CA8845D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3D44DBC-5673-45A0-A023-4A593CA8845D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A1732206-FDF2-441E-BF4D-07B066089AB5}
+	EndGlobalSection
+EndGlobal

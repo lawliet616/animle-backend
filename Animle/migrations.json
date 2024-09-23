@@ -1,0 +1,9 @@
+﻿{
+  "ConnectionProjectName": "Animle",
+  "ConnectionName": "TestDb",
+  "FluentMigrationToolPath": "%USERPROFILE%\\.nuget\\packages\\fluentmigrator.console\\5.0.0\\tools\\net48\\any\\Migrate.exe",
+  "DbProvider": "SqlServer",
+  "DbProviderHelpUrl": "https://fluentmigrator.github.io/articles/runners/runner-console.html#--provider---dbtype---dbvalue-required",
+  "ScriptsFolder": "Scripts",
+  "TimeFormat": "yyyyMMddHHmmss"
+} 
