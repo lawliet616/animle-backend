@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Animle.Migrations
 {
     [DbContext(typeof(AnimleDbContext))]
-    [Migration("20240805160012_kek")]
-    partial class kek
+    [Migration("20240924190952_Unathenticated")]
+    partial class Unathenticated
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -174,6 +174,29 @@ namespace Animle.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("threebythreeLikes");
+                });
+
+            modelBuilder.Entity("Animle.Models.UnathenticatedGames", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Fingerpring")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("GameId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UnathenticatedGames");
                 });
 
             modelBuilder.Entity("Animle.Models.Versus", b =>

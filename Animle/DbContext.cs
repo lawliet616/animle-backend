@@ -69,6 +69,7 @@ public class AnimleDbContext : DbContext
     public DbSet<ThreebythreeLike> threebythreeLikes { get; set; }
     public DbSet<Threebythree> Threebythree { get; set; }
     public DbSet<Quiz> Quizes { get; set; }
+    public DbSet<UnathenticatedGames> UnathenticatedGames { get; set; }
     public DbSet<AnimeWithEmoji> AnimeWithEmoji { get; set; }
     public DbSet<User> Users { get; set; }
 

@@ -81,31 +81,8 @@ namespace Animle.Controllers
         public async Task<IActionResult> DailyResult([FromBody] DailyGameResult gameResult )
         {
             SimpleResponse simpleResponse = new();
-            string token = HttpContext.Request.Headers["Authorization"];
-            if (token == null)
+            if (HttpContext.Items["user"] is User user)
             {
-                simpleResponse.Response = "Login required";
-                return Unauthorized(Response);
-            }
-            var claims = _tokenService.ValidateToken(token);
-
-            if (claims == null)
-            {
-                simpleResponse.Response = "Token invalid";
-                return Unauthorized(Response);
-            }
-
-
-            var userNameClaim = claims.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
-
-
-            User user = _animleConect.Users.Include(u => u.GameContests).FirstOrDefault(u => u.Name == userNameClaim.Value);
-
-            if (user == null)
-            {
-                simpleResponse.Response = "User not found";
-                return NotFound(Response);
-            }
             ContestGame dailyAnimes = _cacheManager.GetCachedItem<ContestGame>("daily");
 
             if (!user.GameContests.Any(u => u.gameGuid == dailyAnimes.Id))
@@ -127,7 +104,12 @@ namespace Animle.Controllers
            
             simpleResponse.Response = "You have Already Played this game!";
             return BadRequest(simpleResponse.Response);
-
+            }
+            else
+            {
+                simpleResponse.Response = "User not found";
+                return NotFound(Response);
+            }
 
 
         }
@@ -152,11 +134,6 @@ namespace Animle.Controllers
                })
               .Take(4).ToList();
             return Ok(filteredList);
-
-
-
-
-
         }
 
         [HttpGet]
@@ -182,6 +159,33 @@ namespace Animle.Controllers
                int gameType = rnd.Next(0, 4);
                a.Type = UtilityService.GetTypeByNumber(gameType);
            });
+
+            return Ok(anim);
+        }
+
+        [HttpGet]
+        [EnableRateLimiting("fixed")]
+        [Route("emoji-quiz")]
+        public IActionResult EmojiQuiz()
+        {
+            Random rnd = new Random();
+            List<AnimeFilter> anim = _animleConect.AnimeWithEmoji.ToList().OrderBy(item => rnd.Next()).Take(10).Select(x => new AnimeFilter
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Thumbnail = x.Thumbnail,
+                Description = x.Description,
+                Image = x.Image,
+                properties = x.properties,
+                EmojiDescription = x.EmojiDescription,
+                MyanimeListId = x.MyanimeListId,
+            }).ToList();
+            anim.ForEach((a) =>
+            {
+                int random = rnd.Next(0, anim.Count - 1);
+                int gameType = rnd.Next(0, 4);
+                a.Type = UtilityService.GetTypeByNumber(gameType);
+            });
 
             return Ok(anim);
         }

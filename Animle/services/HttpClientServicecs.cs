@@ -10,6 +10,7 @@ namespace Animle.services
         {
             HttpClient client = new HttpClient();
 
+
             apiUrl += subUrl;
 
             try
@@ -18,7 +19,9 @@ namespace Animle.services
                  .AddJsonFile("appsettings.json")
                     .Build();
 
-                client.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", "5ab79100e2772855f94a8372f5863c36");
+                string malId = configuration.GetSection("AppSettings:MalId").Value;
+
+                client.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", malId);
             
                 HttpResponseMessage response = await client.GetAsync(apiUrl);
 

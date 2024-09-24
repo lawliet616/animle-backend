@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Security.Claims;
 using Animle.classes;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore;
 
 namespace Animle.services.Quartz
 {
@@ -30,11 +31,94 @@ namespace Animle.services.Quartz
         }
 
 
+
+
+
+
+
+
+
         public async Task Execute(IJobExecutionContext context)
         {
 
 
-            Random rnd = new Random();
+
+
+
+            int page = 1; // Page number (starting from 1)
+            int limit = 500; // Number of items per page
+            int offset = (page - 1) * limit;
+            string apiSubUrl = $"anime/ranking?nfsw&ranking_type=bypopularity&limit={limit}&offset={offset}&fields=id,title,main_picture,alternative_titles,start_date,end_date,synopsis,mean,rank,popularity,num_list_users,num_scoring_users,nsfw,created_at,updated_at,media_type,status,genres,my_list_status,num_episodes,start_season,broadcast,source,average_episode_duration,rating,pictures,background,related_anime,related_manga,recommendations,studios,statistics";
+
+            var malResult = await malService.ReturnAny(apiSubUrl, apiUrl);
+            List<AnimeWithEmoji> animeWithEmojis = new List<AnimeWithEmoji>();
+            string jsonString = malResult;
+            MalApiObject animeData = JsonSerializer.Deserialize<MalApiObject>(jsonString);
+            if (animeData.data != null)
+            {
+                animeData.data.ForEach((anime) =>
+                {
+                    if (!anime.node.title.ToLower().Contains("season") && !anime.node.title.Contains(" Part "))
+                    {
+                        AnimeWithEmoji animeWithEmoji = new AnimeWithEmoji();
+                        List<string> propertyList = new List<string>();
+                        propertyList.AddRange(anime.node.genres.Select(x => x.name));
+                        propertyList.AddRange(anime.node.studios.Select(x => x.name));
+                        propertyList.Add("start date:" + anime.node.start_date);
+                        propertyList.Add("end date:" + anime.node.end_date);
+                        propertyList.Add("media type:" + anime.node.media_type);
+                        propertyList.Add("source:" + anime.node.source);
+                        animeWithEmoji.properties = JsonSerializer.Serialize(propertyList);
+                        animeWithEmoji.Title = anime.node.alternative_titles.en;
+                        animeWithEmoji.MyanimeListId = anime.node.id;
+                        animeWithEmoji.JapaneseTitle = anime.node.title;
+                        animeWithEmoji.Image = anime.node.main_picture.large;
+                        animeWithEmoji.Description = anime.node.synopsis;
+                        animeWithEmoji.Thumbnail = anime.node.main_picture.large;
+                        animeWithEmojis.Add(animeWithEmoji);
+                    }
+                });
+
+
+
+
+                animeWithEmojis.ForEach((anime) =>
+                {
+
+
+                    _animle.AnimeWithEmoji.Add(anime);
+
+
+                });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                Random rnd = new Random();
 
 
                 List<AnimeWithEmoji> animes = _animle.AnimeWithEmoji.ToList();
@@ -73,10 +157,7 @@ namespace Animle.services.Quartz
                 });
 
                 cacheManager.SetCacheItem("daily", dailyGame, TimeSpan.FromDays(1));
-
-
-
-            }
+          
 
 
         }
@@ -129,6 +210,17 @@ namespace Animle.services.Quartz
                 });
             }
             cacheManager.SetCacheItem("daily", dailyGame, TimeSpan.FromDays(1));
+
+            try
+            {
+                await _animle.UnathenticatedGames.ExecuteDeleteAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+
+            }
+
 
         }
     }
