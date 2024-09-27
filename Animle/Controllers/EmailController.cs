@@ -9,6 +9,14 @@ namespace Animle.Controllers
     [ApiController]
     public class EmailController : ControllerBase
     {
+
+       private readonly EmailService _emailService;
+
+       public EmailController(EmailService emailService)
+        {
+            _emailService = emailService;
+        }
+
         [EnableRateLimiting("fixed")]
         [Route("form")]
         [HttpPost]
@@ -16,7 +24,7 @@ namespace Animle.Controllers
         {
             SimpleResponse simpleResponse = new SimpleResponse();
 
-            var emailSent = EmailService.SendEmail(email);
+            var emailSent = _emailService.SendEmail(email);
             if (emailSent == false)
             {
                 simpleResponse.Response = "There was a problem send the email. Try it later please";

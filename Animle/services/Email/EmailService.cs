@@ -1,20 +1,27 @@
-﻿using Animle.interfaces;
+﻿using Animle.classes;
+using Animle.Helpers;
+using Animle.interfaces;
 using MailKit.Net.Smtp;
+using Microsoft.Extensions.Options;
 using MimeKit;
 
-public static class EmailService
+public  class EmailService
 {
-    public static Boolean SendEmail(EmailDto emailDto)
+    private readonly ConfigSettings _appSettings;
+
+    public EmailService(IOptions<ConfigSettings> options)
     {
-        var configuration = new ConfigurationBuilder()
-         .AddJsonFile("appsettings.json")
-          .Build();
+        _appSettings = options.Value;
+    }
+    public  Boolean SendEmail(EmailDto emailDto)
+    {
 
-        string email = configuration.GetSection("AppSettings:Email").Value;
 
-        string emailPass = configuration.GetSection("AppSettings:EmailPassword").Value;
+        string email = _appSettings.Email;
 
-        string gSercret = configuration.GetSection("AppSettings:GmailSecret").Value;
+        string emailPass = _appSettings.EmailPassword;
+
+        string gSercret = _appSettings.GmailSecret;
 
 
         var emailMessage = new MimeMessage();

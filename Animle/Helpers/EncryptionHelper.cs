@@ -1,21 +1,24 @@
-﻿using System;
-using System.IO;
+﻿using Animle.classes;
+using Microsoft.Extensions.Options;
+using NHibernate.Cfg;
+using System;
 using System.Security.Cryptography;
 using System.Text;
 
-public static class EncryptionHelper
+public class EncryptionHelper
 {
-    // Convert hex string to byte array
+    private readonly ConfigSettings _appSettings;
 
-    public static byte[] Encrypt(byte[] plainBytes)
+    public EncryptionHelper(IOptions<ConfigSettings> options)
     {
-         var configuration = new ConfigurationBuilder()
-         .AddJsonFile("appsettings.json")
-          .Build();
+        _appSettings = options.Value;
+    }
 
-        string secret = configuration.GetSection("AppSettings:HashingSercret").Value;
+    public byte[] Encrypt(byte[] plainBytes)
+    {
+        string secret = _appSettings.HashingSercret;
         byte[] key = Encoding.UTF8.GetBytes(secret);
-        byte[] encryptedBytes = null;
+        byte[] encryptedBytes;
 
         using (Aes aes = Aes.Create())
         {

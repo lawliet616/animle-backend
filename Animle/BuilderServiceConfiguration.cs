@@ -8,15 +8,16 @@ using Animle.Interfaces;
 using Animle.services.Token;
 using Animle.Services;
 
+using Animle.classes;
+using Microsoft.Extensions.Options;
+
 namespace Animle.services
 {
     public static class BuilderServiceConfiguration
     {
         public static void ConfigureServices(WebApplicationBuilder builder)
         {
-            var configuration = new ConfigurationBuilder()
-             .AddJsonFile("appsettings.json")
-              .Build();
+          
             builder.Services.AddRateLimiter(opt =>
             {
                    opt.AddFixedWindowLimiter(policyName: "fixed", options =>
@@ -32,21 +33,25 @@ namespace Animle.services
             builder.Services.RegisterCronJobs();
             builder.Services.AddSwaggerGen();
             builder.Services.AddHttpClient();
-         
-            builder.Services.AddDbContext<AnimleDbContext>(options =>
-            {
-            string dbConnect = configuration.GetSection("AppSettings:DbConnection").Value;
-            options.UseMySql(dbConnect, ServerVersion.AutoDetect(dbConnect));
+            builder.Services.Configure<ConfigSettings>(builder.Configuration.GetSection("AppSettings"));
 
-        });
-          
+            builder.Services.AddDbContext<AnimleDbContext>((serviceProvider, options) =>
+            {
+                var configSettings = serviceProvider.GetRequiredService<IOptions<ConfigSettings>>().Value;
+                string dbConnect = configSettings.DbConnection;
+                options.UseMySql(dbConnect, ServerVersion.AutoDetect(dbConnect));
+            });
+        
+
             builder.Services.AddSignalR();
             builder.Services.AddScoped<CustomAuthorizationFilter>();
-
+            builder.Services.AddSingleton<EncryptionHelper>();
             builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
             builder.Services.AddSingleton<SignalrAnimeService>();
             builder.Services.AddSingleton<IRequestCacheManager, RequestCacheManager>();
+            builder.Services.AddSingleton<EmailService>();
+
             builder.Services.AddScoped<IAnimeService, AnimeService>();
             builder.Services.AddScoped<IQuizService, QuizService>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -54,7 +59,9 @@ namespace Animle.services
 
             builder.Services.AddSingleton<TokenService>(provider =>
             {
-                var secretKey = configuration.GetSection("AppSettings:SecretKey").Value;
+                var configSettings = provider.GetRequiredService<IOptions<ConfigSettings>>().Value;
+
+                string secretKey = configSettings.SecretKey;
 
                 return new TokenService(secretKey);
             });

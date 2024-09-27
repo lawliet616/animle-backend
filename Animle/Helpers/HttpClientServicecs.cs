@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Animle.classes;
+using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using static System.Net.WebRequestMethods;
 
@@ -6,6 +8,12 @@ namespace Animle.Helpers
 {
     public class MyanimeListClientHttpService
     {
+        private readonly ConfigSettings _appSettings;
+
+        public MyanimeListClientHttpService(IOptions<ConfigSettings> options)
+        {
+            _appSettings = options.Value;
+        }
         async public Task<string> ReturnAny(string subUrl, string apiUrl = "https://api.myanimelist.net/v2/")
         {
             HttpClient client = new HttpClient();
@@ -15,11 +23,8 @@ namespace Animle.Helpers
 
             try
             {
-                var configuration = new ConfigurationBuilder()
-                 .AddJsonFile("appsettings.json")
-                    .Build();
 
-                string malId = configuration.GetSection("AppSettings:MalId").Value;
+                string malId = _appSettings.MalId;
 
                 client.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", malId);
 
