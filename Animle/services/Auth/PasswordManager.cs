@@ -1,8 +1,8 @@
 ﻿using System.Security.Cryptography;
 
-public class PasswordManager
+public static class PasswordManager
 {
-    public string HashPassword(string password)
+    public static string HashPassword(string password)
     {
         byte[] salt;
         new RNGCryptoServiceProvider().GetBytes(salt = new byte[16]); 
@@ -19,7 +19,7 @@ public class PasswordManager
         return hashedPassword;
     }
 
-    public bool VerifyPassword(string enteredPassword, string storedPassword)
+    public static bool VerifyPassword(string enteredPassword, string storedPassword)
     {
         byte[] hashBytes = Convert.FromBase64String(storedPassword);
 

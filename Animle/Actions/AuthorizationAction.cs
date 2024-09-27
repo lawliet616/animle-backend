@@ -38,7 +38,7 @@ public class CustomAuthorizationFilter : IAsyncActionFilter
         }
         var userNameClaim = claims.FindFirst(c => c.Type == ClaimTypes.NameIdentifier);
 
-        User user = _context.Users.Include(u => u.GameContests).FirstOrDefault(u => u.Name == userNameClaim.Value);
+        User user = _context.Users.FirstOrDefault(u => u.Name == userNameClaim.Value);
         if (user == null) {
             context.Result = new UnauthorizedObjectResult(new { Response = "Token invalid" });
             return;

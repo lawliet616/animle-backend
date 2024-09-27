@@ -7,26 +7,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="classes\NewFolder\**" />
     <Compile Remove="Models\NewFolder\**" />
     <Compile Remove="NewFolder1\**" />
     <Compile Remove="NewFolder2\**" />
-    <Compile Remove="NewFolder\**" />
-    <Content Remove="classes\NewFolder\**" />
     <Content Remove="Models\NewFolder\**" />
     <Content Remove="NewFolder1\**" />
     <Content Remove="NewFolder2\**" />
-    <Content Remove="NewFolder\**" />
-    <EmbeddedResource Remove="classes\NewFolder\**" />
     <EmbeddedResource Remove="Models\NewFolder\**" />
     <EmbeddedResource Remove="NewFolder1\**" />
     <EmbeddedResource Remove="NewFolder2\**" />
-    <EmbeddedResource Remove="NewFolder\**" />
-    <None Remove="classes\NewFolder\**" />
     <None Remove="Models\NewFolder\**" />
     <None Remove="NewFolder1\**" />
     <None Remove="NewFolder2\**" />
-    <None Remove="NewFolder\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,9 +27,9 @@
     <Compile Remove="ModelMaps\Class.cs" />
     <Compile Remove="Models\AnimeData.cs" />
     <Compile Remove="Models\JikanMetaDatas.cs" />
-    <Compile Remove="services\BuilderServiceConfiguration.cs" />
-    <Compile Remove="services\CronJobService.cs" />
-    <Compile Remove="services\Quartz\Messages.cs" />
+    <Compile Remove="Services\BuilderServiceConfiguration.cs" />
+    <Compile Remove="Services\CronJobService.cs" />
+    <Compile Remove="Services\Quartz\Messages.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,7 @@
 ﻿using Animle;
 using Animle.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using NHibernate.Linq;
 
 public class AnimleDbContext : DbContext
@@ -14,6 +15,12 @@ public class AnimleDbContext : DbContext
             .HasMany(a => a.Threebythree)
             .WithMany(t => t.Animes)
              .UsingEntity(j => j.ToTable("AnimeThreebythree"));
+
+        modelBuilder.Entity<AnimeWithEmoji>()
+            .HasMany(a => a.DailyChallenges)
+             .WithMany(t => t.Animes)
+             .UsingEntity(j => j.ToTable("AnimeDailyChallenges"));
+
 
         modelBuilder.Entity<Threebythree>()
         .HasOne(t => t.User)
@@ -39,6 +46,8 @@ public class AnimleDbContext : DbContext
             .WithMany(c => c.Likes)
             .HasForeignKey(l => l.quizId);
 
+        modelBuilder.Entity<User>().HasIndex(e => new { e.Name, e.Email })
+            .IsUnique();
 
         modelBuilder.Entity<ThreebythreeLike>()
             .HasOne(l => l.User)
@@ -51,19 +60,47 @@ public class AnimleDbContext : DbContext
             .HasForeignKey(l => l.ThreebythreeId);
 
         modelBuilder.Entity<GameContest>()
-         .HasOne(t => t.User)
-         .WithMany(u => u.GameContests)
-         .OnDelete(DeleteBehavior.Cascade);
+          .HasOne(gc => gc.User)
+          .WithMany(u => u.GameContests)
+          .HasForeignKey(gc => gc.UserId)
+          .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<GameContest>()
+            .HasOne(gc => gc.Challenge)
+            .WithMany(dc => dc.GameContests)
+            .HasForeignKey(gc => gc.DailyChallengeId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Versus>()
          .HasOne(t => t.User)
           .WithMany(u => u.VersusRecords)
          .OnDelete(DeleteBehavior.Cascade);
 
+        modelBuilder.Entity<AnimeWithEmoji>()
+             .HasOne(a => a.GuessGame)
+             .WithOne(g => g.Anime)
+             .HasForeignKey<GuessGame>(g => g.AnimeWithEmojiId)
+             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<UserGuessGame>()
+            .HasOne(a => a.GuessGame)
+            .WithMany(g => g.UserGuessGames)
+            .HasForeignKey(g => g.GuessGameId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<User>()
+        .HasMany(a => a.UserGuessGames)
+        .WithOne(g => g.user)
+        .HasForeignKey(g => g.UserId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+
 
     }
 
     public DbSet<GameContest> GameContests { get; set; }
+    public DbSet<DailyChallenge> DailyChallenges { get; set; }
+
     public DbSet<Versus> Versus { get; set; }
     public DbSet<QuizLikes> QuizLikes { get; set; }
     public DbSet<ThreebythreeLike> threebythreeLikes { get; set; }
@@ -72,5 +109,10 @@ public class AnimleDbContext : DbContext
     public DbSet<UnathenticatedGames> UnathenticatedGames { get; set; }
     public DbSet<AnimeWithEmoji> AnimeWithEmoji { get; set; }
     public DbSet<User> Users { get; set; }
+    public DbSet<GuessGame> GuessGames { get; set; }
+
+    public DbSet<UserGuessGame> UserGuessGames { get; set; }
+
+
 
 }

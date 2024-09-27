@@ -1,10 +1,13 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-namespace Animle.services.Cache
+﻿using Animle.Interfaces;
+using Microsoft.Extensions.Caching.Memory;
+
+namespace Animle.Services
 {
 
-    public class RequestCacheManager
+
+    public class RequestCacheManager : IRequestCacheManager
     {
-        private MemoryCache _cache;
+        private readonly MemoryCache _cache;
 
         public RequestCacheManager()
         {
@@ -17,6 +20,7 @@ namespace Animle.services.Cache
             {
                 return cachedData;
             }
+
             T requestData = await request.Invoke();
 
             if (requestData != null)
@@ -26,11 +30,10 @@ namespace Animle.services.Cache
 
             return requestData;
         }
-        public void SetCacheItem<T>(string cacheKey, T Item, TimeSpan cacheDuration)
+
+        public void SetCacheItem<T>(string cacheKey, T item, TimeSpan cacheDuration)
         {
-
-            _cache.Set(cacheKey, Item, DateTimeOffset.Now.Add(cacheDuration));
-
+            _cache.Set(cacheKey, item, DateTimeOffset.Now.Add(cacheDuration));
         }
 
         public T? GetCachedItem<T>(string cacheKey)
@@ -42,6 +45,5 @@ namespace Animle.services.Cache
 
             return default;
         }
-
     }
 }

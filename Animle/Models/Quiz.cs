@@ -16,6 +16,7 @@ namespace Animle
 
         [Column(TypeName = "varchar(100)")]
         public string Thumbnail { get; set; }
+
         public int UserId { get; set; }
         public virtual User user { get; set; }
 

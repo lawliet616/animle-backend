@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Animle.Migrations
 {
     [DbContext(typeof(AnimleDbContext))]
-    [Migration("20240924190952_Unathenticated")]
-    partial class Unathenticated
+    [Migration("20240927072922_userguessgames")]
+    partial class userguessgames
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,6 +20,21 @@ namespace Animle.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.15")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            modelBuilder.Entity("AnimeWithEmojiDailyChallenge", b =>
+                {
+                    b.Property<int>("AnimesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DailyChallengesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("AnimesId", "DailyChallengesId");
+
+                    b.HasIndex("DailyChallengesId");
+
+                    b.ToTable("AnimeDailyChallenges", (string)null);
+                });
 
             modelBuilder.Entity("AnimeWithEmojiQuiz", b =>
                 {
@@ -91,33 +106,72 @@ namespace Animle.Migrations
                     b.ToTable("AnimeWithEmoji");
                 });
 
-            modelBuilder.Entity("Animle.Models.GameContest", b =>
+            modelBuilder.Entity("Animle.Models.DailyChallenge", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    b.Property<int>("Points")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TimePlayed")
+                    b.Property<DateTime>("TimeCreated")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.HasKey("Id");
+
+                    b.ToTable("DailyChallenges");
+                });
+
+            modelBuilder.Entity("Animle.Models.GameContest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("DailyChallengeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TimePlayed")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("gameGuid")
-                        .HasColumnType("char(36)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("DailyChallengeId");
 
                     b.HasIndex("UserId");
 
                     b.ToTable("GameContests");
+                });
+
+            modelBuilder.Entity("Animle.Models.GuessGame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("AnimeWithEmojiId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TimeCreated")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnimeWithEmojiId")
+                        .IsUnique();
+
+                    b.ToTable("GuessGames");
                 });
 
             modelBuilder.Entity("Animle.Models.QuizLikes", b =>
@@ -199,6 +253,31 @@ namespace Animle.Migrations
                     b.ToTable("UnathenticatedGames");
                 });
 
+            modelBuilder.Entity("Animle.Models.UserGuessGame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("GuessGameId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Result")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuessGameId");
+
+                    b.ToTable("UserGuessGames");
+                });
+
             modelBuilder.Entity("Animle.Models.Versus", b =>
                 {
                     b.Property<int>("Id")
@@ -256,11 +335,11 @@ namespace Animle.Migrations
 
                     b.Property<string>("Email")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -271,7 +350,25 @@ namespace Animle.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name", "Email")
+                        .IsUnique();
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("AnimeWithEmojiDailyChallenge", b =>
+                {
+                    b.HasOne("Animle.Models.AnimeWithEmoji", null)
+                        .WithMany()
+                        .HasForeignKey("AnimesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Animle.Models.DailyChallenge", null)
+                        .WithMany()
+                        .HasForeignKey("DailyChallengesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("AnimeWithEmojiQuiz", b =>
@@ -306,13 +403,32 @@ namespace Animle.Migrations
 
             modelBuilder.Entity("Animle.Models.GameContest", b =>
                 {
+                    b.HasOne("Animle.Models.DailyChallenge", "Challenge")
+                        .WithMany("GameContests")
+                        .HasForeignKey("DailyChallengeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Animle.User", "User")
                         .WithMany("GameContests")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Challenge");
+
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Animle.Models.GuessGame", b =>
+                {
+                    b.HasOne("Animle.Models.AnimeWithEmoji", "Anime")
+                        .WithOne("GuessGame")
+                        .HasForeignKey("Animle.Models.GuessGame", "AnimeWithEmojiId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Anime");
                 });
 
             modelBuilder.Entity("Animle.Models.QuizLikes", b =>
@@ -364,6 +480,17 @@ namespace Animle.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Animle.Models.UserGuessGame", b =>
+                {
+                    b.HasOne("Animle.Models.GuessGame", "GuessGame")
+                        .WithMany("UserGuessGames")
+                        .HasForeignKey("GuessGameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("GuessGame");
+                });
+
             modelBuilder.Entity("Animle.Models.Versus", b =>
                 {
                     b.HasOne("Animle.User", "User")
@@ -384,6 +511,21 @@ namespace Animle.Migrations
                         .IsRequired();
 
                     b.Navigation("user");
+                });
+
+            modelBuilder.Entity("Animle.Models.AnimeWithEmoji", b =>
+                {
+                    b.Navigation("GuessGame");
+                });
+
+            modelBuilder.Entity("Animle.Models.DailyChallenge", b =>
+                {
+                    b.Navigation("GameContests");
+                });
+
+            modelBuilder.Entity("Animle.Models.GuessGame", b =>
+                {
+                    b.Navigation("UserGuessGames");
                 });
 
             modelBuilder.Entity("Animle.Models.Threebythree", b =>

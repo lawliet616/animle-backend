@@ -1,144 +1,89 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Animle;
-using Animle.interfaces;
-using Microsoft.AspNetCore.RateLimiting;
+﻿using Animle.interfaces;
 using Animle.services.Token;
-using Microsoft.EntityFrameworkCore;
-using Animle.Controllers;
-using Azure;
-using System.Security.Claims;
+using Animle;
+using Microsoft.AspNetCore.Mvc;
+using Animle.Models;
 
-namespace StoryTeller.Controllers
+[Route("user")]
+[ApiController]
+public class UserController : ControllerBase
 {
-    [EnableRateLimiting("fixed")]
-    [ApiController]
-    [Route("user")]
-    public class UserController : ControllerBase
+    private readonly IUserService _userService;
+    private readonly ILogger<UserController> _logger;
+    private readonly TokenService _tokenService;
+
+
+    public UserController(IUserService userService, ILogger<UserController> logger, TokenService tokenService)
+    {
+        _userService = userService;
+        _tokenService = tokenService;
+        _logger = logger;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser(User user)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var createdUser = await _userService.CreateUserAsync(user);
+            return Ok(new SimpleResponse { Response = "User Created" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while creating user.");
+            // Handle exception
+            return StatusCode(500, new SimpleResponse { Response = "An error occurred while saving data" });
+        }
+    }
+
+    [Route("login")]
+    [HttpPost]
+    public async Task<IActionResult> Login(LoginInfos loginInfos)
+    {
+        var user = await _userService.AuthenticateUserAsync(loginInfos);
+        if (user != null)
+        {
+            var tokenResponse = new TokenResponse { Token = _tokenService.CreateToken(user) };
+            return Ok(tokenResponse);
+        }
+
+        return Unauthorized(new SimpleResponse { Response = "Username or Password is incorrect!" });
+    }
+
+
+    [Route("is-signed-in")]
+    [ServiceFilter(typeof(CustomAuthorizationFilter))]
+    [HttpGet]
+    public IActionResult IsSignedIn()
     {
 
-        private readonly ILogger<UserController> _logger;
-
-        private readonly TokenService _tokenService;
-        private readonly AnimleDbContext _animleDbContext;
-
-
-        public UserController(ILogger<UserController> logger, TokenService tokenService, AnimleDbContext animleDbContext)
+        if (HttpContext.Items["user"] is User user)
         {
-            _tokenService = tokenService;
-            _logger = logger;
-            _animleDbContext = animleDbContext;
+
+            return Ok(new { Response = user.Name });
+
         }
-
-        [HttpPost]
-        public IActionResult CreateUser(User user)
+        else
         {
-
-            SimpleResponse simpleResponse = new SimpleResponse();
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            try
-            {
-                PasswordManager passwordManager = new PasswordManager();
-                user.Password = passwordManager.HashPassword(user.Password);
-                user.Rating = 1000;
-                _animleDbContext.Users.Add(user);
-                _animleDbContext.SaveChanges();
-                simpleResponse.Response = "User Created";
-                return Ok(simpleResponse);
-
-            }
-            catch (Exception ex)
-            {
-
-                if (ex.Message.Contains("Name") || ex.Message.Contains("Email"))
-                {
-                    simpleResponse.Response = "Username or Password is taken";
-                    return Conflict(simpleResponse);
-                }
-
-                return StatusCode(500, "Internal server error");
-            }
-
-
-
+            return Unauthorized();
         }
 
 
-        [Route("login")]
-        [HttpPost]
-        public IActionResult Login(LoginInfos loginInfos)
-        {
-            SimpleResponse response = new SimpleResponse();
-            var user = _animleDbContext.Users.FirstOrDefault(u => u.Name == loginInfos.Name);
-            if (user != null)
-            {
-                PasswordManager passwordManager = new PasswordManager();
-
-
-                bool isAuthenticated = passwordManager.VerifyPassword(loginInfos.Password, user.Password);
-
-                if (isAuthenticated)
-                {
-                    TokenResponse tokenResponse = new();
-                    tokenResponse.Token = _tokenService.CreateToken(user);
-
-                    return Ok(tokenResponse);
-                }
-                else
-                {
-                    response.Response = "Username or Password is incorrect!";
-                    return Unauthorized(response);
-                }
-            }
-            else
-            {
-                response.Response = "User not found!";
-                return NotFound(response);
-            }
-
-        }
-        [Route("is-signed-in")]
-        [ServiceFilter(typeof(CustomAuthorizationFilter))]
-        [HttpGet]
-        public IActionResult IsSignedIn()
-        {
-
-            if (HttpContext.Items["user"] is User user)
-            {
-
-        
-                return Ok(new {Response = user.Name});
-
-            }
-            else
-            {
-                return Unauthorized();
-            }
-
-              
-
-        }
-
-        [Route("leaderboard/{type}")]
-        [HttpGet]
-        public IActionResult leaderBoard(string type)
-        {
-
-           var result = _animleDbContext.GameContests.Where((g)=> g.Type == type ).Include(x => x.User).Select(x => new 
-           {
-               Id = x.Id,
-               UserId = x.User.Id,
-               Name = x.User.Name,
-               Points = x.Points
-
-           }).OrderByDescending(x => x.Id).Take(10).ToList();
-           return Ok(result);
-
-        }
 
     }
+
+
+    [Route("leaderboard/{type}")]
+    [HttpGet]
+    public async Task<IActionResult> LeaderBoard(string type)
+    {
+        List<GameContest> games = await _userService.GetDailyLeaderBoard(type);   
+        return Ok(games);
+    }
+
 }
-
-

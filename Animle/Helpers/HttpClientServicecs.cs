@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using static System.Net.WebRequestMethods;
 
-namespace Animle.services
+namespace Animle.Helpers
 {
     public class MyanimeListClientHttpService
     {
@@ -22,7 +22,7 @@ namespace Animle.services
                 string malId = configuration.GetSection("AppSettings:MalId").Value;
 
                 client.DefaultRequestHeaders.Add("X-MAL-CLIENT-ID", malId);
-            
+
                 HttpResponseMessage response = await client.GetAsync(apiUrl);
 
                 if (response.IsSuccessStatusCode)

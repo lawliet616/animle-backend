@@ -19,6 +19,7 @@ namespace Animle
         public string Email { get; set; }
 
         public int Rating { get; set; }
+
         public Threebythree? Threebythree { get; set; } = null;
         public virtual ICollection<Quiz> Quizzes { get; set; } = new List<Quiz>();
         public virtual ICollection<GameContest> GameContests { get; set; } = new List<GameContest>();
@@ -27,6 +28,8 @@ namespace Animle
         public virtual ICollection<ThreebythreeLike> ThreebythreeLikes { get; set; } = new List<ThreebythreeLike>();
 
         public virtual ICollection<Versus> VersusRecords { get; set; } = new List<Versus>();
+
+        public virtual ICollection<UserGuessGame> UserGuessGames { get; set; } = new List<UserGuessGame>();
 
 
 

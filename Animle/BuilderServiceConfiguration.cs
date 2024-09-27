@@ -1,15 +1,12 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
-using NHibernate;
 using Animle.services.Quartz;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
-using Animle.services.Cache;
 using Animle.SignalR;
+using Animle.Interfaces;
 using Animle.services.Token;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Animle.Services;
 
 namespace Animle.services
 {
@@ -17,7 +14,6 @@ namespace Animle.services
     {
         public static void ConfigureServices(WebApplicationBuilder builder)
         {
-           // var sessionFactory = NHibernateHelper.CreateSessionFactory();
             var configuration = new ConfigurationBuilder()
              .AddJsonFile("appsettings.json")
               .Build();
@@ -49,9 +45,13 @@ namespace Animle.services
 
             builder.Services.AddControllers().AddJsonOptions(x =>
                 x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-            builder.Services.AddSingleton<RequestCacheManager>();
             builder.Services.AddSingleton<SignalrAnimeService>();
-            //  builder.Services.AddSingleton<ISessionFactory>(sessionFactory);
+            builder.Services.AddSingleton<IRequestCacheManager, RequestCacheManager>();
+            builder.Services.AddScoped<IAnimeService, AnimeService>();
+            builder.Services.AddScoped<IQuizService, QuizService>();
+            builder.Services.AddScoped<IUserService, UserService>();
+
+
             builder.Services.AddSingleton<TokenService>(provider =>
             {
                 var secretKey = configuration.GetSection("AppSettings:SecretKey").Value;

@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Text.Json;
 
-namespace Animle.services
+namespace Animle.Helpers
 {
     public static class UtilityService
     {
@@ -25,7 +25,7 @@ namespace Animle.services
                     return "description";
             }
         }
-   
+
         public static string Serialize(object obj)
         {
             var options = new JsonSerializerOptions

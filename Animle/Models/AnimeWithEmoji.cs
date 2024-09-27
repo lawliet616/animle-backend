@@ -20,7 +20,9 @@ namespace Animle.Models
 
         public virtual ICollection<Threebythree> Threebythree { get; set; } = new List<Threebythree>();
         public virtual ICollection<Quiz>? Quizzes { get; set; } = null;
-        
-   
+        public virtual ICollection<DailyChallenge> DailyChallenges { get; set; } = new List<DailyChallenge>();
+
+        public virtual GuessGame? GuessGame { get; set; } 
+
     }
 }
