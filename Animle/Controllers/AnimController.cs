@@ -70,6 +70,7 @@ namespace Animle.Controllers
 
         [HttpGet]
         [EnableRateLimiting("fixed")]
+        [ServiceFilter(typeof(CustomAuthorizationFilter))]
         [Route("emoji-quiz")]
         public IActionResult EmojiQuiz()
         {

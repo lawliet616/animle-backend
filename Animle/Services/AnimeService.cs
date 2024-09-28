@@ -12,7 +12,7 @@ namespace Animle.Services
         Task<SimpleResponse> SubmitGameResultAsync(string type, User user, DailyGameResult gameResult);
         Task<List<AnimeFilter>> FilterAnimeAsync(string query);
         List<AnimeFilter> GetRandomAnimes();
-        GuessGame GetEmojiQuiz(User user);
+        dynamic GetEmojiQuiz(User user);
     }
     public class AnimeService : IAnimeService
     {
@@ -114,7 +114,7 @@ namespace Animle.Services
             return anim;
         }
 
-        public GuessGame GetEmojiQuiz(User user)
+        public dynamic GetEmojiQuiz(User user)
         {
             var guessGame = _cacheManager.GetCachedItem<GuessGame>("dailyGuess");
             var us = _dbContext.Users.Include(x => x.UserGuessGames).FirstOrDefault(u => u.Id == user.Id);
@@ -124,7 +124,10 @@ namespace Animle.Services
                 return null;
             }
 
-            return guessGame;
+            var resObject = new { Id = guessGame.Id, AnimeId = guessGame.Anime.Id, guessGame.Anime.EmojiDescription };
+
+
+            return resObject;
         }
     }
 }
